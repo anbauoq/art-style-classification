@@ -82,7 +82,7 @@ The metric learning model was found to be highly unstable and overfit almost imm
 
 - `data/images/` — raw images in ImageFolder layout
 
-- `data/augmented_images/` — (optional) offline-saved augmented samples
+- `data/augmented_images/` — offline-saved augmented samples
 
 ### Outputs
 
