@@ -9,7 +9,6 @@ IMAGENET_STD = [0.229, 0.224, 0.225]
 def build_strong_transforms(img_size: int = 128):
     """
     Applies a series of strong augmentations for data generation.
-    Intended for under-represented classes. GaussianBlur has been removed.
     """
     return A.Compose([
         A.HorizontalFlip(p=0.5),
