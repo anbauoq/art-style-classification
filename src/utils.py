@@ -1,8 +1,16 @@
 import torch
+import numpy as np
 import torch.nn as nn
 from torchvision import models
 from torchvision.models.efficientnet import MBConv
 from tqdm.notebook import tqdm
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import (
+    f1_score,
+    precision_score,
+    recall_score,
+    accuracy_score,
+)
 
 def set_device():
     """Sets the device to CUDA, MPS, or CPU."""
@@ -77,3 +85,75 @@ def get_predictions(model, loader, device, show_progress=False):
     y_pred = torch.cat(all_preds).numpy()
     y_true = torch.cat(all_true).numpy()
     return y_true, y_pred
+
+def get_all_embeddings(model, loader, device):
+    """Helper function to extract embeddings and labels for a full dataset."""
+    model.eval()
+    all_embeddings = []
+    all_labels = []
+    with torch.no_grad():
+        for xb, yb in loader:
+            xb = xb.to(device)
+            embeddings = model(xb)
+            all_embeddings.append(embeddings.cpu().numpy())
+            all_labels.append(yb.cpu().numpy())
+    return np.vstack(all_embeddings), np.concatenate(all_labels)
+
+
+def evaluate_knn(model, gallery_loader, test_loader, device, n_neighbors=5):
+    """
+    Evaluates the embedding model using a k-NN classifier, returning a full dict of metrics.
+    """
+    train_embeddings, train_labels = get_all_embeddings(model, gallery_loader, device)
+    test_embeddings, test_labels = get_all_embeddings(model, test_loader, device)
+
+    knn = KNeighborsClassifier(n_neighbors=n_neighbors, n_jobs=-1)
+    knn.fit(train_embeddings, train_labels)
+
+    y_pred_knn = knn.predict(test_embeddings)
+    
+    f1 = f1_score(test_labels, y_pred_knn, average="macro", zero_division=0)
+    precision = precision_score(test_labels, y_pred_knn, average="macro", zero_division=0)
+    recall = recall_score(test_labels, y_pred_knn, average="macro", zero_division=0)
+    accuracy = accuracy_score(test_labels, y_pred_knn)
+    
+    return {
+        'f1_macro': f1,
+        'precision_macro': precision,
+        'recall_macro': recall,
+        'accuracy': accuracy
+    }
+
+def get_knn_predictions(model, gallery_loader, test_loader, device, n_neighbors=5):
+    """
+    Fits a k-NN on the gallery embeddings and returns true labels and predictions
+    for the test set. Used for confusion matrix and classification reports.
+    """
+    train_embeddings, train_labels = get_all_embeddings(model, gallery_loader, device)
+    test_embeddings, test_labels = get_all_embeddings(model, test_loader, device)
+
+    knn = KNeighborsClassifier(n_neighbors=n_neighbors, n_jobs=-1)
+    knn.fit(train_embeddings, train_labels)
+
+    y_pred_knn = knn.predict(test_embeddings)
+
+    return test_labels, y_pred_knn
+
+
+def load_backbone_for_embedding(model_path, device):
+    import torch, torch.nn as nn
+    from torchvision import models
+
+    model = models.efficientnet_b0()
+    state = torch.load(model_path, map_location="cpu")
+    state = {k: v for k, v in state.items() if not k.startswith("classifier.")}
+    model.classifier = nn.Identity()
+    model.load_state_dict(state, strict=False)
+    model.to(device).eval()
+
+    with torch.no_grad():
+        z = model(torch.zeros(1,3,224,224, device=device))
+        emb_dim = int((z[0] if isinstance(z,(tuple,list)) else z).shape[-1])
+
+    print(f"Loaded embedding model with output dimension {emb_dim}.")
+    return model
