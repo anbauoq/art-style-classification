@@ -66,38 +66,3 @@ def get_datasets(root="augmented_images", img_size=128):
     test_ds  = datasets.ImageFolder(os.path.join(root, "test"),  transform=tfm)
 
     return {"train": train_ds, "val": val_ds, "test": test_ds}
-
-
-def get_full_dataloader(root="../data/images", img_size=128, batch_size=128):
-    """
-    Creates a DataLoader for the entire, unsplit ImageFolder dataset.
-    
-    Args:
-        root (str): The root directory of the images.
-        img_size (int): The image size for resizing.
-        batch_size (int): The batch size for the DataLoader.
-
-    Returns:
-        (torch.utils.data.DataLoader, torchvision.datasets.ImageFolder): 
-            The DataLoader and the full dataset instance.
-    """
-    tfm = transforms.Compose([
-        transforms.Resize((img_size, img_size)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
-    ])
-
-    full_dataset = datasets.ImageFolder(root=root, transform=tfm)
-    
-    pin_mem = torch.cuda.is_available()
-    
-    full_loader = torch.utils.data.DataLoader(
-        full_dataset,
-        batch_size=batch_size,
-        shuffle=False,
-        pin_memory=pin_mem,
-        num_workers=4
-    )
-    
-    print(f"Created DataLoader for {len(full_dataset)} total images.")
-    return full_loader, full_dataset
