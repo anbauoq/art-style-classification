@@ -1,7 +1,9 @@
-# 🎨 Art Style Classification Project
+# Art Style Classification
 
-This project focuses on classifying images into eight distinct art styles: ArtDeco, cartoon, Cubism, Impressionism, Japonism, Naturalism, photo and Rococo.
+## Overview
+This repository provides the implementation of deep learning models for art-style image classification under severe class imbalance, including training, evaluation, and feature analysis.
 
+Detailed methodology, experiments, and results are described in the accompanying technical report `art_style_classification.pdf`.
 
 ## Project Workflow
 
@@ -34,20 +36,6 @@ Two primary modeling strategies were implemented and compared, both using **Effi
 * **Classification:** A **GradientBoosting Classifier** was trained on the extracted features, achieving results (Macro F1: 0.75) close to the end-to-end model.
 
 
-## Results
-
-The **Direct Classification** approach was clearly the most effective and robust for this task. The Gradient Boosting classifier, trained on the features extracted from the direct classifier, performed nearly as well.
-
-| Metric | Direct Classifier | GradientBoosting | Metric Learning |
-| :--- | :---: | :---: | :---: |
-| **Macro F1-Score** | **0.77** | 0.75 | 0.68 |
-| **Accuracy** | **0.81** | 0.79 | 0.71 |
-| **Macro Precision** | 0.79 | 0.76 | 0.68 |
-| **Macro Recall** | 0.77 | 0.75 | 0.69 |
-
-*Table: Final performance comparison on the test set.*
-
-The metric learning model was found to be highly unstable and overfit almost immediately, likely due to the task's complexity and the limited data. The direct classifier provided the most robust and effective solution.
 
 ## Project Structure
 
@@ -88,6 +76,6 @@ The metric learning model was found to be highly unstable and overfit almost imm
 
 - `outputs/models/` — checkpoints
 
-- `outputs/figs/` — plots (loss curves, conf mats, distributions)
+- `outputs/figs/` — plots
 
 - `outputs/param-optim*/` — sweep logs and summaries
