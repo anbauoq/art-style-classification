@@ -1,40 +1,17 @@
 # Art Style Classification
 
-## Overview
 This repository provides the implementation of deep learning models for art-style image classification under severe class imbalance, including training, evaluation, and feature analysis.
 
 Detailed methodology, experiments, and results are described in the accompanying technical report `art_style_classification.pdf`.
 
-## Project Workflow
+## Workflow
 
-### 1. Data Preparation
-* **Exploratory Data Analysis (EDA):** Analyzed the dataset to identify key challenges, noting the small sample size and significant class imbalance.
-* **Data Split:** The dataset was split into training, validation, and test sets (70/15/15) using stratification to maintain class proportions.
-* **Data Augmentation:** Implemented an **offline augmentation** strategy using the `albumentations` library. This was used to up-sample minority classes, creating a more balanced dataset for training.
-
-### 2. Modeling Approaches
-
-Two primary modeling strategies were implemented and compared, both using **EfficientNet-B0** as the backbone architecture.
-
-#### Approach 1: Direct Classification
-* **Method:** Fine-tuned the EfficientNet-B0 model for a standard multi-class classification task.
-* **Loss:** Standard Cross-Entropy Loss.
-* **Techniques:** Employed progressive unfreezing, cosine annealing learning rate, and a custom early stopping mechanism to prevent overfitting.
-
-#### Approach 2: Metric Learning
-* **Method:** Trained the model to learn a feature embedding space where similar art styles are clustered together.
-* **Loss:** Triplet Margin Loss, combined with a Hard Triplet Miner to find challenging examples.
-* **Data Sampling:** Used an `MPerClassSampler` to ensure each batch contained multiple images from several classes, which is necessary for effective triplet mining.
-
-### 3. Hyperparameter Tuning
-* **Optuna** was used to perform Bayesian hyperparameter optimization for both modeling approaches, tuning parameters like learning rate, batch size, and weight decay.
-
-### 4. Feature Analysis
-* **Feature Extraction:** Embeddings (1280-dimensional) were extracted from the best-performing direct classifier.
-* **Visualization:** **UMAP** was used to project the high-dimensional features into 2D, showing clear separation for some classes.
-* **Clustering:** **K-Means** clustering was applied to the embeddings.
-* **Classification:** A **GradientBoosting Classifier** was trained on the extracted features, achieving results (Macro F1: 0.75) close to the end-to-end model.
-
+- **Data Preparation:** EDA, stratified 70/15/15 split, and offline augmentation with albumentations to address class imbalance.
+- **Modeling:** EfficientNet-B0 backbone with two approaches:
+  - Direct classification (Cross-Entropy, progressive unfreezing, cosine LR, early stopping)
+  - Metric learning (Triplet Margin Loss with hard mining)
+- **Hyperparameter Tuning:** Bayesian optimization with Optuna.
+- **Feature Analysis:** Embedding extraction, UMAP visualization, K-Means clustering, and Gradient Boosting classification on frozen features.
 
 
 ## Project Structure
