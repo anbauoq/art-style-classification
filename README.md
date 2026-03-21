@@ -2,7 +2,7 @@
 
 This repository provides the implementation of deep learning models for art-style image classification under severe class imbalance, including training, evaluation, and feature analysis.
 
-Detailed methodology, experiments, and results are described in the accompanying technical report `art_style_classification.pdf`.
+Detailed methodology, experiments, and results are described in the accompanying technical report `technical_report.pdf`.
 
 ## Workflow
 
